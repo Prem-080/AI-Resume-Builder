@@ -1,0 +1,16 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# requirements.txt
+# AI-Powered Resume & Cover Letter Generator — Capstone Project
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Core UI Framework
+streamlit==1.32.2
+
+# OpenAI GPT API (Transformer-based LLM)
+openai==1.14.3
+
+# Environment variable management
+python-dotenv==1.0.1
+
+# Standard library (no install needed, listed for documentation):
+# re, os
