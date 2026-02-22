@@ -19,7 +19,7 @@ Academic Structure:
 import os
 import streamlit as st
 from dotenv import load_dotenv
-from utils import generate_prompt, call_llm, format_output, evaluate_resume
+from utils import generate_prompt, call_llm, format_output, evaluate_resume, generate_pdf
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURATION & ENVIRONMENT SETUP
@@ -67,21 +67,6 @@ st.markdown("""
         margin-bottom: 2rem;
         box-shadow: 0 8px 32px rgba(102,126,234,0.35);
         position: relative;
-        overflow: hidden;
-    }
-    .hero-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
-        animation: shimmer 4s infinite;
-    }
-    @keyframes shimmer {
-        0%   { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
     }
     .hero-header h1 {
         color: #ffffff;
@@ -114,59 +99,13 @@ st.markdown("""
         font-weight: 500;
     }
 
-    /* ── Section Cards ── */
-    .form-card {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.10);
-        border-radius: 14px;
-        padding: 1.5rem;
-        margin-bottom: 1.2rem;
-        backdrop-filter: blur(10px);
-    }
     .section-label {
         color: #a78bfa;
         font-size: 0.78rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 1.5px;
-        margin-bottom: 1rem;
-    }
-
-    /* ── Output Sections ── */
-    .output-card {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 14px;
-        padding: 1.6rem;
-        margin-bottom: 1.2rem;
-        transition: border-color 0.3s ease;
-    }
-    .output-card:hover {
-        border-color: rgba(167,139,250,0.5);
-    }
-    .output-header {
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        margin-bottom: 1rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
-    .output-header h3 {
-        color: #e2e8f0;
-        font-size: 1.1rem;
-        font-weight: 600;
-        margin: 0;
-    }
-    .output-icon {
-        font-size: 1.4rem;
-    }
-    .output-content {
-        color: #cbd5e1;
-        font-size: 0.9rem;
-        line-height: 1.75;
-        white-space: pre-wrap;
-        font-family: 'JetBrains Mono', monospace;
+        margin-bottom: 0.5rem;
     }
 
     /* ── Score Card ── */
@@ -402,49 +341,45 @@ st.markdown('<p class="section-label">📋 Candidate Profile</p>', unsafe_allow_
 col1, col2 = st.columns(2, gap="large")
 
 with col1:
-    st.markdown('<div class="form-card">', unsafe_allow_html=True)
-    st.markdown('<p class="section-label">👤 Personal Information</p>', unsafe_allow_html=True)
-    full_name  = st.text_input("Full Name *", placeholder="e.g. Alex Johnson")
-    email      = st.text_input("Email Address *", placeholder="alex.johnson@email.com")
-    phone      = st.text_input("Phone Number *", placeholder="+1-555-0100")
-    linkedin   = st.text_input("LinkedIn Profile URL", placeholder="linkedin.com/in/alexjohnson")
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown('<p class="section-label">👤 Personal Information</p>', unsafe_allow_html=True)
+        full_name  = st.text_input("Full Name *", placeholder="e.g. Alex Johnson")
+        email      = st.text_input("Email Address *", placeholder="alex.johnson@email.com")
+        phone      = st.text_input("Phone Number *", placeholder="+1-555-0100")
+        linkedin   = st.text_input("LinkedIn Profile URL", placeholder="linkedin.com/in/alexjohnson")
 
-    st.markdown('<div class="form-card">', unsafe_allow_html=True)
-    st.markdown('<p class="section-label">🎓 Education</p>', unsafe_allow_html=True)
-    education = st.text_area(
-        "Education Details *",
-        placeholder="e.g. B.Tech in Computer Science, XYZ University, 2020–2024, GPA: 8.5",
-        height=100,
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown('<p class="section-label">🎓 Education</p>', unsafe_allow_html=True)
+        education = st.text_area(
+            "Education Details *",
+            placeholder="e.g. B.Tech in Computer Science, XYZ University, 2020–2024, GPA: 8.5",
+            height=100,
+        )
 
 with col2:
-    st.markdown('<div class="form-card">', unsafe_allow_html=True)
-    st.markdown('<p class="section-label">💼 Professional Details</p>', unsafe_allow_html=True)
-    job_role = st.text_input(
-        "Target Job Role *",
-        placeholder="e.g. Machine Learning Engineer Intern",
-    )
-    skills = st.text_input(
-        "Technical Skills * (comma-separated)",
-        placeholder="Python, TensorFlow, PyTorch, SQL, Docker",
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown('<p class="section-label">💼 Professional Details</p>', unsafe_allow_html=True)
+        job_role = st.text_input(
+            "Target Job Role *",
+            placeholder="e.g. Machine Learning Engineer Intern",
+        )
+        skills = st.text_input(
+            "Technical Skills * (comma-separated)",
+            placeholder="Python, TensorFlow, PyTorch, SQL, Docker",
+        )
 
-    st.markdown('<div class="form-card">', unsafe_allow_html=True)
-    st.markdown('<p class="section-label">🚀 Experience & Projects</p>', unsafe_allow_html=True)
-    projects = st.text_area(
-        "Projects *",
-        placeholder="• Sentiment Analysis — Built an LSTM classifier with 91% accuracy...\n• House Price Predictor — Reduced RMSE by 23% using feature engineering...",
-        height=110,
-    )
-    experience = st.text_area(
-        "Work Experience",
-        placeholder="• Intern @ ABC Corp (June–Aug 2023) — Developed REST APIs using FastAPI...\nLeave blank if no experience yet.",
-        height=110,
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown('<p class="section-label">🚀 Experience & Projects</p>', unsafe_allow_html=True)
+        projects = st.text_area(
+            "Projects *",
+            placeholder="• Sentiment Analysis — Built an LSTM classifier with 91% accuracy...\n• House Price Predictor — Reduced RMSE by 23% using feature engineering...",
+            height=110,
+        )
+        experience = st.text_area(
+            "Work Experience",
+            placeholder="• Intern @ ABC Corp (June–Aug 2023) — Developed REST APIs using FastAPI...\nLeave blank if no experience yet.",
+            height=110,
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -524,6 +459,9 @@ if generate_btn:
                 st.session_state.evaluation      = evaluation
                 st.session_state.raw_output      = raw
                 st.session_state.stored_name     = full_name
+                st.session_state.stored_email    = email
+                st.session_state.stored_phone    = phone
+                st.session_state.stored_linkedin = linkedin
                 st.session_state.stored_role     = job_role
 
                 st.success("✅ Resume generated successfully!")
@@ -550,125 +488,108 @@ if st.session_state.generated and st.session_state.output_sections:
     role_for_dl = st.session_state.get("stored_role", "role").replace(" ", "_")
 
     st.markdown("---")
-    st.markdown('<p class="section-label">📊 Results & Evaluation</p>', unsafe_allow_html=True)
+    
+    # ── Tabbed Result Navigation ──
+    res_tabs = st.tabs(["📊 Evaluation", "📌 Summary", "📄 Resume", "✉️ Cover Letter"])
+    
+    with res_tabs[0]:
+        st.markdown('<p class="section-label">📊 Performance Metrics</p>', unsafe_allow_html=True)
+        score = evaluation["total_score"]
+        grade = evaluation["grade"]
+        color = evaluation["color"]
 
-    # ── Resume Strength Score ──
-    score = evaluation["total_score"]
-    grade = evaluation["grade"]
-    color = evaluation["color"]
-
-    st.markdown(f"""
-    <div class="score-card">
-        <div style="display:flex; align-items:flex-end; gap:1rem; flex-wrap:wrap;">
-            <div>
+        # Compact Score Card
+        st.markdown(f"""
+        <div class="score-card">
+            <div style="display:flex; align-items:center; gap:1.5rem;">
                 <div class="score-number">{score}</div>
-                <div class="score-label">Resume Strength Score / 100</div>
+                <div>
+                    <div style="font-size: 1.4rem; color: {color}; font-weight: 700;">{grade}</div>
+                    <div class="score-label">Overall Resume Strength</div>
+                </div>
             </div>
-            <div style="font-size: 1.3rem; color: {color}; font-weight: 600; padding-bottom: 0.5rem;">
-                {grade}
+            <div class="metric-row">
+                <div class="metric-pill">⚡ Verbs: <span>{evaluation['verb_score']}/30</span></div>
+                <div class="metric-pill">🎯 Skills: <span>{evaluation['keyword_score']}/40</span></div>
+                <div class="metric-pill">📝 Length: <span>{evaluation['length_score']}/30</span></div>
             </div>
         </div>
-        <div class="metric-row">
-            <div class="metric-pill">⚡ Action Verbs Score: <span>{evaluation['verb_score']}/30</span></div>
-            <div class="metric-pill">🎯 Keyword Match Score: <span>{evaluation['keyword_score']}/40</span></div>
-            <div class="metric-pill">📝 Content Length Score: <span>{evaluation['length_score']}/30</span></div>
-            <div class="metric-pill">🔤 Word Count: <span>{evaluation['word_count']}</span></div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-    # ── Detail metrics ──
-    eval_col1, eval_col2 = st.columns(2)
+        col_e1, col_e2 = st.columns(2)
+        with col_e1:
+            st.write("**⚡ Action Verbs Found**")
+            if evaluation["found_verbs"]:
+                tags = "".join(f'<span class="verb-tag">{v}</span>' for v in evaluation["found_verbs"])
+                st.markdown(tags, unsafe_allow_html=True)
+            else:
+                st.caption("None detected.")
 
-    with eval_col1:
-        st.markdown("**⚡ Action Verbs Detected**")
-        if evaluation["found_verbs"]:
-            tags = "".join(f'<span class="verb-tag">{v}</span>' for v in evaluation["found_verbs"])
-            st.markdown(tags, unsafe_allow_html=True)
+        with col_e2:
+            st.write("**✅ Skills Matched**")
+            if evaluation["skills_matched"]:
+                tags = "".join(f'<span class="skill-tag">{s}</span>' for s in evaluation["skills_matched"])
+                st.markdown(tags, unsafe_allow_html=True)
+            else:
+                st.caption("No direct matches.")
+
+    with res_tabs[1]:
+        summary_content = sections.get("summary", "").strip()
+        if summary_content:
+            with st.container(border=True):
+                st.markdown(summary_content)
         else:
-            st.caption("No strong action verbs detected.")
+            st.info("No summary generated.")
 
-    with eval_col2:
-        st.markdown("**✅ Skills Matched in Resume**")
-        if evaluation["skills_matched"]:
-            tags = "".join(f'<span class="skill-tag">{s}</span>' for s in evaluation["skills_matched"])
-            st.markdown(tags, unsafe_allow_html=True)
+    with res_tabs[2]:
+        resume_content = sections.get("resume", "").strip()
+        if resume_content:
+            with st.container(border=True):
+                # We use markdown instead of st.code for better typography in the UI
+                st.markdown(resume_content)
         else:
-            st.caption("No skill keywords matched.")
+            st.info("No resume generated.")
 
-    st.markdown("---")
-
-    # ── Professional Summary ──
-    if sections.get("summary"):
-        st.markdown("""
-        <div class="output-card">
-            <div class="output-header">
-                <span class="output-icon">📌</span>
-                <h3>Professional Summary</h3>
-            </div>
-        """, unsafe_allow_html=True)
-        st.markdown(f'<div class="output-content">{sections["summary"]}</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    # ── ATS-Optimized Resume ──
-    if sections.get("resume"):
-        st.markdown("""
-        <div class="output-card">
-            <div class="output-header">
-                <span class="output-icon">📄</span>
-                <h3>ATS-Optimized Resume</h3>
-            </div>
-        """, unsafe_allow_html=True)
-        st.markdown(f'<div class="output-content">{sections["resume"]}</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    # ── Tailored Cover Letter ──
-    if sections.get("cover_letter"):
-        st.markdown("""
-        <div class="output-card">
-            <div class="output-header">
-                <span class="output-icon">✉️</span>
-                <h3>Tailored Cover Letter</h3>
-            </div>
-        """, unsafe_allow_html=True)
-        st.markdown(f'<div class="output-content">{sections["cover_letter"]}</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    with res_tabs[3]:
+        cover_content = sections.get("cover_letter", "").strip()
+        if cover_content:
+            with st.container(border=True):
+                st.markdown(cover_content)
+        else:
+            st.info("No cover letter generated.")
 
     # ─────────────────────────────────────────────────────────────────────────
-    # ACTION BUTTONS — Download & Regenerate
+    # ACTION BUTTONS
     # ─────────────────────────────────────────────────────────────────────────
     st.markdown("<br>", unsafe_allow_html=True)
-    dl_col1, dl_col2, dl_col3 = st.columns([1, 1.5, 1])
+    dl_col1, dl_col2, dl_col3 = st.columns([1.2, 1.2, 1])
 
-    # Compile full text for download
-    full_text = f"""AI-POWERED RESUME & COVER LETTER
-Generated for: {st.session_state.get('stored_name', '')}
-Target Role:   {st.session_state.get('stored_role', '')}
-{'='*60}
-
-PROFESSIONAL SUMMARY
-{'─'*40}
-{sections.get('summary', '')}
-
-RESUME
-{'─'*40}
-{sections.get('resume', '')}
-
-COVER LETTER
-{'─'*40}
-{sections.get('cover_letter', '')}
-
-{'='*60}
-Resume Strength Score: {score}/100 — {grade}
-Action Verbs Used: {evaluation['verb_count']}
-Skills Matched: {len(evaluation['skills_matched'])}
-Word Count: {evaluation['word_count']}
-{'='*60}
-Generated using AI Resume & Cover Letter Generator
-Powered by Groq LLaMA | Built with Streamlit
-"""
+    # Plain text for TXT download
+    sep_line = "─" * 40
+    full_text = f"""AI-POWERED RESUME & COVER LETTER\nGenerated for: {st.session_state.get('stored_name', '')}\n{'='*60}\n\nSUMMARY\n{sep_line}\n{sections.get('summary', '')}\n\nRESUME\n{sep_line}\n{sections.get('resume', '')}\n\nCOVER LETTER\n{sep_line}\n{sections.get('cover_letter', '')}\n\n{'='*60}\nScore: {evaluation['total_score']}/100 | Grade: {evaluation['grade']}"""
 
     with dl_col1:
+        try:
+            pdf_bytes = generate_pdf(
+                name=st.session_state.get("stored_name", ""),
+                email=st.session_state.get("stored_email", ""),
+                phone=st.session_state.get("stored_phone", ""),
+                linkedin=st.session_state.get("stored_linkedin", ""),
+                job_role=st.session_state.get("stored_role", ""),
+                sections=sections,
+                evaluation=evaluation,
+            )
+            st.download_button(
+                label="📄 Download PDF",
+                data=pdf_bytes,
+                file_name=f"{name_for_dl}_{role_for_dl}_Resume.pdf",
+                mime="application/pdf",
+                use_container_width=True,
+            )
+        except Exception as pdf_err:
+            st.error(f"PDF Error: {pdf_err}")
+
+    with dl_col2:
         st.download_button(
             label="⬇️ Download .txt",
             data=full_text,
@@ -680,8 +601,6 @@ Powered by Groq LLaMA | Built with Streamlit
     with dl_col3:
         if st.button("🔄 Regenerate", use_container_width=True):
             st.session_state.generated = False
-            st.session_state.output_sections = {}
-            st.session_state.evaluation = {}
             st.rerun()
 
 

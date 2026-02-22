@@ -40,7 +40,9 @@ Resume Evaluation (Rule-Based ML Heuristics):
 """
 
 import re
+from io import BytesIO
 from groq import Groq
+from fpdf import FPDF
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CONSTANTS
@@ -59,25 +61,32 @@ ACTION_VERBS = [
     "published", "reviewed", "solved", "supported", "tested", "validated",
 ]
 
-SYSTEM_PROMPT = """You are an expert HR professional and resume writer.
-Generate:
-1. A 3-4 line professional summary.
-2. An ATS-friendly resume with clear headings.
-3. A tailored cover letter specific to the provided job role.
-Use strong action verbs.
-Optimize for internship and entry-level positions.
-Ensure clarity, professionalism, and impact.
+SYSTEM_PROMPT = """You are an expert HR professional and senior resume writer.
+Generate a high-end, ATS-optimized professional document set.
 
-Structure your response EXACTLY as follows with these headings on their own lines:
+### GUIDELINES:
+1. **Professional Summary**: 3-4 impactful lines using strong action verbs.
+2. **Resume**: Use clear sections with markdown-style headers (e.g., ## EXPERIENCE, ## EDUCATION). 
+   - Use bullet points (•) for responsibilities.
+   - Focus on quantifiable achievements.
+3. **Cover Letter**: Professional, tailored, and persuasive.
+
+### IMPORTANT FORMATTING RULES:
+- FORCE a single-column layout. 
+- ABSOLUTELY NO multi-column formatting using spaces.
+- Vertical flow only.
+- Use '##' for main section headers in the resume.
+
+Structure your response EXACTLY as follows:
 
 SUMMARY
-[3-4 line professional summary here]
+[Professional summary here]
 
 RESUME
-[Full ATS-optimized resume here]
+[Full structured resume here starting with ## headers]
 
 COVER LETTER
-[Full tailored cover letter here]
+[Full professional cover letter here]
 """
 
 
@@ -304,6 +313,182 @@ def evaluate_resume(resume_text: str, skills: str, job_role: str) -> dict:
         "grade": grade,
         "color": color,
     }
+
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FUNCTION: generate_pdf()
+# ─────────────────────────────────────────────────────────────────────────────
+def generate_pdf(
+    name: str,
+    email: str,
+    phone: str,
+    linkedin: str,
+    job_role: str,
+    sections: dict,
+    evaluation: dict,
+) -> bytes:
+    """
+    Build a V2 Premium structured PDF using fpdf2.
+    
+    Layout:
+      - Centered Header: Bold Name + High-contrast subtitle
+      - Contact Strip: Icons/Labels in a clean centered line
+      - Sections: Each parsed for '##' markers to draw bold headers with accent underlines
+      - Footer: Scoring metrics in a sleek bar
+    """
+
+    def safe(text: str) -> str:
+        """Sanitize text for Latin-1 encoding with expanded replacements."""
+        replacements = {
+            "\u2013": "-", "\u2014": "--", "\u2018": "'", "\u2019": "'",
+            "\u201c": '"', "\u201d": '"', "\u2022": "*", "\u2026": "...",
+            "\u00e9": "e", "\u00e8": "e", "\u00ea": "e", "\u00e0": "a",
+            "\u2192": "->", "\u2714": "v", "\u2713": "v", "\u00b7": ".",
+            "\u00a0": " ", "\u2500": "-", "\u2014": "--",
+        }
+        for k, v in replacements.items():
+            text = text.replace(k, v)
+        # Final pass: remove everything non-latin1
+        return text.encode("latin-1", errors="ignore").decode("latin-1")
+
+    # ── Color Palette ───────────────────────────────────────────────────────
+    PRIMARY     = (43,  45,  66)   # Charcoal
+    ACCENT      = (72,  149, 239)  # Soft blue
+    MUTED       = (108, 117, 125)  # Grey
+    BG_LIGHT    = (248, 249, 250)
+    TEXT_MAIN   = (33,  37,  41)
+
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=20)
+    pdf.add_page()
+    pdf.set_margins(18, 18, 18)
+    W = pdf.w - 36
+
+    def draw_header() -> None:
+        """Render the modern centered header on current page."""
+        pdf.set_y(15)
+        pdf.set_font("Helvetica", "B", 24)
+        pdf.set_text_color(*PRIMARY)
+        pdf.cell(W, 12, safe(name.upper() if name else "CANDIDATE NAME"), ln=True, align="C")
+
+        pdf.set_font("Helvetica", "B", 10)
+        pdf.set_text_color(*ACCENT)
+        pdf.cell(W, 6, safe(job_role.upper() if job_role else "PROFESSIONAL PROFILE"), ln=True, align="C")
+
+        # Contact Strip
+        parts = [p.strip() for p in [email, phone, linkedin] if p and p.strip()]
+        if parts:
+            pdf.set_font("Helvetica", "", 9)
+            pdf.set_text_color(*MUTED)
+            contact_line = "  •  ".join(parts)
+            pdf.cell(W, 7, safe(contact_line), ln=True, align="C")
+
+        pdf.ln(8)
+        pdf.set_draw_color(*ACCENT)
+        pdf.set_line_width(0.5)
+        pdf.line(18, pdf.get_y(), 18 + W, pdf.get_y())
+        pdf.ln(6)
+
+    # Draw first page header
+    draw_header()
+
+    def draw_section_header(label: str) -> None:
+        """Render a section divider with accent underline."""
+        pdf.ln(4)
+        pdf.set_font("Helvetica", "B", 11)
+        pdf.set_text_color(*PRIMARY)
+        pdf.cell(W, 7, safe(label.upper()), ln=True)
+        # Accent underline
+        curr_y = pdf.get_y() - 1
+        pdf.set_draw_color(*ACCENT)
+        pdf.set_line_width(0.3)
+        pdf.line(18, curr_y, 18 + 25, curr_y) # Short underline
+        pdf.ln(2)
+
+    def draw_body_block(content: str) -> None:
+        """Smart multi-line rendering with bullet point detection."""
+        pdf.set_font("Helvetica", "", 10)
+        pdf.set_text_color(*TEXT_MAIN)
+        
+        # Collapse excessive AI whitespace
+        content = re.sub(r' {3,}', ' ', content)
+        
+        for line in content.splitlines():
+            line = line.strip()
+            if not line:
+                pdf.ln(2)
+                continue
+            
+            # Detect Markdown-style headers inside body
+            if line.startswith("##"):
+                pdf.ln(3)
+                pdf.set_font("Helvetica", "B", 10)
+                pdf.set_text_color(*PRIMARY)
+                pdf.cell(W, 6, safe(line.replace("##", "").strip().upper()), ln=True)
+                pdf.set_font("Helvetica", "", 10)
+                pdf.set_text_color(*TEXT_MAIN)
+                continue
+
+            # Detect bullets
+            if line.startswith("•") or line.startswith("-") or line.startswith("*"):
+                # Indented bullet point
+                pdf.set_x(23)
+                line = "• " + line.lstrip("•-* ")
+                pdf.multi_cell(W - 5, 5.5, safe(line))
+            else:
+                pdf.multi_cell(W, 5.5, safe(line))
+        pdf.ln(2)
+
+    # ── Content Loop ────────────────────────────────────────────────────────
+    # SUMMARY
+    summary = sections.get("summary", "").strip()
+    if summary:
+        draw_section_header("Professional Summary")
+        draw_body_block(summary)
+
+    # RESUME (Usually contains multiple subsections like Experience, Education)
+    resume = sections.get("resume", "").strip()
+    if resume:
+        # Check if it has its own headers
+        if "##" not in resume:
+            draw_section_header("Resume Details")
+        draw_body_block(resume)
+
+    # COVER LETTER (Always start on a new page for professional separation)
+    cover = sections.get("cover_letter", "").strip()
+    if cover:
+        pdf.add_page()
+        draw_header()
+        draw_section_header("Cover Letter")
+        draw_body_block(cover)
+
+    # ── SLEEK FOOTER ────────────────────────────────────────────────────────
+    score = evaluation.get("total_score", 0) or 0
+    grade = evaluation.get("grade", "N/A")
+    words = evaluation.get("word_count", 0)
+
+    pdf.set_y(-25)
+    pdf.set_fill_color(*PRIMARY)
+    pdf.rect(0, pdf.h - 18, pdf.w, 18, "F")
+    
+    pdf.set_y(pdf.h - 14)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("Helvetica", "B", 9)
+    footer_text = f"RESUME STRENGTH SCORE: {score}/100  |  GRADE: {grade}  |  WORD COUNT: {words}"
+    pdf.cell(W, 5, safe(footer_text), align="C", ln=True)
+    
+    pdf.set_font("Helvetica", "I", 8)
+    pdf.set_text_color(180, 180, 180)
+    pdf.cell(W, 5, "Generated via AI Resume Builder - Professional Edition", align="C")
+
+    # ── Export ──────────────────────────────────────────────────────────────
+    raw = pdf.output()
+    if isinstance(raw, (bytes, bytearray)):
+        return bytes(raw)
+    buf = BytesIO()
+    buf.write(raw)
+    return buf.getvalue()
 
 
 # ─────────────────────────────────────────────────────────────────────────────
