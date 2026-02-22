@@ -1,6 +1,8 @@
 """
 utils.py — Modular Helper Functions for AI Resume & Cover Letter Generator
 ==========================================================================
+NOTE: Uses Groq API (free tier) — https://console.groq.com
+      Models: llama-3.3-70b-versatile, llama-3.1-8b-instant, mixtral-8x7b-32768
 
 AI/ML Justification:
 --------------------
@@ -38,7 +40,7 @@ Resume Evaluation (Rule-Based ML Heuristics):
 """
 
 import re
-from openai import OpenAI
+from groq import Groq
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CONSTANTS
@@ -145,13 +147,12 @@ COVER LETTER
 # ─────────────────────────────────────────────────────────────────────────────
 # FUNCTION: call_llm()
 # ─────────────────────────────────────────────────────────────────────────────
-def call_llm(api_key: str, user_prompt: str, model: str = "gpt-3.5-turbo") -> str:
+def call_llm(api_key: str, user_prompt: str, model: str = "llama-3.3-70b-versatile") -> str:
     """
-    Invoke the OpenAI GPT model using prompt engineering.
+    Invoke a Groq-hosted LLM using prompt engineering (free tier).
 
-    This function sends a structured two-part message (system + user) to the
-    GPT API. The system message defines the LLM's persona and output schema,
-    while the user message provides candidate-specific context.
+    Groq runs open-source models (LLaMA 3, Mixtral) on custom LPU hardware,
+    offering the same OpenAI-compatible chat-completions interface at no cost.
 
     The model uses:
     - Multi-head self-attention to weigh relationships across all input tokens
@@ -159,14 +160,14 @@ def call_llm(api_key: str, user_prompt: str, model: str = "gpt-3.5-turbo") -> st
     - Temperature-controlled sampling for creative yet coherent outputs
 
     Args:
-        api_key  (str): OpenAI API key loaded from environment.
+        api_key     (str): Groq API key from https://console.groq.com
         user_prompt (str): Formatted candidate prompt.
-        model    (str): GPT model identifier (default: gpt-3.5-turbo).
+        model       (str): Groq model ID (default: llama-3.3-70b-versatile).
 
     Returns:
         str: Raw generated text from the LLM.
     """
-    client = OpenAI(api_key=api_key)
+    client = Groq(api_key=api_key)
 
     response = client.chat.completions.create(
         model=model,
@@ -174,11 +175,9 @@ def call_llm(api_key: str, user_prompt: str, model: str = "gpt-3.5-turbo") -> st
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_prompt},
         ],
-        temperature=0.7,      # Controls creativity vs. determinism
-        max_tokens=2000,      # Sufficient for resume + cover letter
-        top_p=0.95,           # Nucleus sampling for diverse vocabulary
-        frequency_penalty=0.3,  # Reduce repetitive phrasing
-        presence_penalty=0.2,   # Encourage introduction of new relevant content
+        temperature=0.7,   # Controls creativity vs. determinism
+        max_tokens=2000,   # Sufficient for resume + cover letter
+        top_p=0.95,        # Nucleus sampling for diverse vocabulary
     )
 
     return response.choices[0].message.content.strip()

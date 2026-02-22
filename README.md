@@ -4,7 +4,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.32-red?logo=streamlit)](https://streamlit.io)
-[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--3.5%2F4-green?logo=openai)](https://openai.com)
+[![Groq](https://img.shields.io/badge/Groq-LLaMA%203-orange?logo=meta)](https://console.groq.com)
 
 ---
 
@@ -13,8 +13,8 @@
 | # | Section | Coverage |
 |---|---------|----------|
 | 1 | Problem Statement | Resume writing gap for students & freshers |
-| 2 | Proposed Solution | GPT-powered generation with Prompt Engineering |
-| 3 | System Dev Approach | Modular Python + Streamlit + OpenAI API |
+| 2 | Proposed Solution | Groq LLaMA-powered generation with Prompt Engineering |
+| 3 | System Dev Approach | Modular Python + Streamlit + Groq API |
 | 4 | Algorithm & Deployment | Transformer LLM · ATS scoring heuristics |
 | 5 | Result | Generated resume, cover letter & strength score |
 | 6 | Conclusion | Context-aware AI > template-based tools |
@@ -70,10 +70,13 @@ venv\Scripts\activate          # Windows
 pip install -r requirements.txt
 ```
 
+> **No billing required.** This project uses the **Groq API** (free tier) instead of OpenAI.
+> Get a free key at [console.groq.com](https://console.groq.com) — sign up with Google/GitHub.
+
 ### Step 4 — Configure API key
 ```bash
 copy .env.example .env
-# Open .env and replace the placeholder with your real API key
+# Open .env and replace GROQ_API_KEY with your real key from console.groq.com
 ```
 Or simply enter your key directly in the app's UI the first time you run it.
 
@@ -93,7 +96,7 @@ Open [http://localhost:8501](http://localhost:8501) in your browser.
 4. **Add Secret:**
    - Under *Settings → Secrets*, add:
      ```toml
-     OPENAI_API_KEY = "sk-your-real-api-key"
+     GROQ_API_KEY = "gsk_your-real-groq-api-key"
      ```
 5. **Click Deploy** — Your app will be live in ~2 minutes!
 
@@ -106,7 +109,7 @@ Open [http://localhost:8501](http://localhost:8501) in your browser.
 
 | Concept | Application |
 |---------|-------------|
-| **Transformer LLM** | GPT generates coherent, role-specific documents |
+| **Transformer LLM** | LLaMA 3 generates coherent, role-specific documents |
 | **Prompt Engineering** | System + user prompts structure model output |
 | **NLP Tokenization** | Input fields tokenized for model processing |
 | **Context-Aware Generation** | All profile fields influence the generated text |
@@ -119,9 +122,9 @@ Open [http://localhost:8501](http://localhost:8501) in your browser.
 ## 📦 Dependencies
 
 | Package | Version | Purpose |
-|---------|---------|---------|
+|---------|---------|--------|
 | `streamlit` | 1.32.2 | Web UI framework |
-| `openai` | 1.14.3 | GPT API client |
+| `groq` | ≥ 0.9.0 | Groq API client — free LLaMA 3 / Mixtral inference |
 | `python-dotenv` | 1.0.1 | `.env` file loader |
 
 ---

@@ -1,6 +1,8 @@
 """
 app.py — AI-Powered Resume & Cover Letter Generator
 =====================================================
+NOTE: Uses Groq API (free tier) — https://console.groq.com
+      No billing required. Sign up and get a free API key instantly.
 Capstone Project: Using Generative AI (GPT) with Streamlit
 
 Academic Structure:
@@ -314,7 +316,8 @@ with st.sidebar:
 
 ---
 ### 🔬 AI/ML Stack
-- **Model:** OpenAI GPT-3.5 / GPT-4
+- **Provider:** Groq (Free Tier)
+- **Models:** LLaMA 3.3 70B · Mixtral
 - **Technique:** Prompt Engineering
 - **Architecture:** Transformer (LLM)
 - **Task:** Natural Language Generation
@@ -324,22 +327,24 @@ with st.sidebar:
 """)
 
     model_choice = st.selectbox(
-        "GPT Model",
-        ["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo"],
+        "Groq Model",
+        ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"],
         index=0,
-        help="GPT-4 produces higher quality output but costs more API credits."
+        help="llama-3.3-70b gives the best quality. llama-3.1-8b-instant is fastest."
     )
 
     st.markdown("---")
     st.markdown("### 📖 References")
     st.markdown("""
-- Vaswani et al. (2017). *Attention Is All You Need*.
-- Brown et al. (2020). *GPT-3: Language Models are Few-Shot Learners*.
-- OpenAI API Documentation (2024).
+- Vaswani et al. (2017). *Attention Is All Need*.
+- Brown et al. (2020). *Language Models are Few-Shot Learners*.
+- Meta AI. (2024). *LLaMA 3: Open Foundation and Fine-Tuned Chat Models*. [ai.meta.com](https://ai.meta.com/llama)
+- Jiang, A., et al. (2024). *Mixtral of Experts*. [arXiv:2401.04088](https://arxiv.org/abs/2401.04088)
+- Groq API Documentation (2024).
 - Streamlit Documentation (2024).
 """)
     st.markdown("---")
-    st.caption("Built with ❤️ using Python, Streamlit & OpenAI GPT")
+    st.caption("Built with ❤️ using Python, Streamlit & Groq LLaMA")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -348,7 +353,7 @@ with st.sidebar:
 st.markdown("""
 <div class="hero-header">
     <h1>🤖 AI Resume & Cover Letter Generator</h1>
-    <p>Capstone Project — Powered by OpenAI GPT & Prompt Engineering</p>
+    <p>Capstone Project — Powered by Groq LLaMA & Prompt Engineering</p>
     <div class="badge-row">
         <span class="badge">🧠 Generative AI</span>
         <span class="badge">📄 NLP</span>
@@ -363,26 +368,26 @@ st.markdown("""
 # ─────────────────────────────────────────────────────────────────────────────
 # API KEY HANDLING
 # ─────────────────────────────────────────────────────────────────────────────
-api_key = os.getenv("OPENAI_API_KEY", "")
+api_key = os.getenv("GROQ_API_KEY", "")
 
 if not api_key:
     api_key = st.text_input(
-        "🔑 OpenAI API Key",
+        "🔑 Groq API Key (Free)",
         type="password",
-        placeholder="sk-...",
-        help="Enter your OpenAI API key. Get one at https://platform.openai.com/api-keys",
+        placeholder="gsk_...",
+        help="Get a free key at https://console.groq.com — no billing required!",
     )
     if not api_key:
         st.warning(
-            "⚠️ **API Key Required** — Enter your OpenAI API key above or set "
-            "`OPENAI_API_KEY` in your `.env` file to proceed.",
+            "⚠️ **Groq API Key Required** — Enter your free Groq API key above or set "
+            "`GROQ_API_KEY` in your `.env` file to proceed.",
             icon="⚠️",
         )
         st.info(
-            "💡 **How to get a free API key:**\n"
-            "1. Visit [platform.openai.com](https://platform.openai.com/api-keys)\n"
-            "2. Create an account → Go to API Keys\n"
-            "3. Click *Create new secret key*\n"
+            "💡 **How to get a FREE Groq API key (no billing needed):**\n"
+            "1. Visit [console.groq.com](https://console.groq.com)\n"
+            "2. Sign up with Google / GitHub\n"
+            "3. Go to *API Keys* → *Create API Key*\n"
             "4. Copy and paste it above",
             icon="ℹ️",
         )
@@ -525,12 +530,12 @@ if generate_btn:
 
             except Exception as e:
                 error_msg = str(e)
-                if "api_key" in error_msg.lower() or "authentication" in error_msg.lower():
-                    st.error("🔑 **Invalid API Key** — Please check your OpenAI API key and try again.")
-                elif "rate limit" in error_msg.lower():
-                    st.error("⏳ **Rate Limit Exceeded** — Please wait a moment and try again.")
+                if "api_key" in error_msg.lower() or "authentication" in error_msg.lower() or "invalid_api_key" in error_msg.lower():
+                    st.error("🔑 **Invalid API Key** — Check your Groq API key at console.groq.com")
+                elif "rate limit" in error_msg.lower() or "rate_limit" in error_msg.lower():
+                    st.error("⏳ **Rate Limit** — You've hit Groq's free tier limit. Wait a moment and try again.")
                 elif "model" in error_msg.lower():
-                    st.error(f"🤖 **Model Error** — Try switching to `gpt-3.5-turbo` in the sidebar.\nDetails: {error_msg}")
+                    st.error(f"🤖 **Model Error** — Try switching to `llama-3.1-8b-instant` in the sidebar.\nDetails: {error_msg}")
                 else:
                     st.error(f"❌ **Error:** {error_msg}")
 
@@ -660,7 +665,7 @@ Skills Matched: {len(evaluation['skills_matched'])}
 Word Count: {evaluation['word_count']}
 {'='*60}
 Generated using AI Resume & Cover Letter Generator
-Powered by OpenAI GPT | Built with Streamlit
+Powered by Groq LLaMA | Built with Streamlit
 """
 
     with dl_col1:
@@ -700,7 +705,7 @@ Job seekers—especially students and fresh graduates—often lack:
 - Ability to tailor documents for specific roles
 
 ### 2. Proposed Solution
-We leverage **OpenAI's GPT (Generative Pre-trained Transformer)** to automate:
+We leverage **Groq's LLaMA (Large Language Model)** to automate:
 - Professional summary generation (3–4 sentences)
 - ATS-optimized resume creation
 - Role-specific cover letter drafting
@@ -711,7 +716,7 @@ Using **Prompt Engineering**, we guide the LLM to produce structured, high-quali
 | Layer | Technology |
 |-------|------------|
 | Frontend UI | Streamlit (Python) |
-| LLM Integration | OpenAI Python SDK |
+| LLM Integration | Groq Python SDK |
 | Prompt Design | Structured System + User Prompts |
 | Evaluation | Rule-Based NLP Scoring |
 | Deployment | Streamlit Cloud / Local |
@@ -755,7 +760,7 @@ This capstone demonstrates that **context-aware generative AI** can dramatically
 the quality and efficiency of professional document creation.
 
 Key findings:
-- GPT-based generation produces ATS-optimized content superior to templates
+- LLaMA-based generation produces ATS-optimized content superior to templates
 - Prompt engineering allows fine-grained control over output structure and tone
 - Rule-based scoring provides transparent, interpretable feedback to users
 - The modular architecture (utils.py) ensures maintainability and extensibility
@@ -784,18 +789,18 @@ in real-world career assistance tools.
         st.markdown("""
 ### 8. References
 
-1. Vaswani, A., et al. (2017). *Attention Is All You Need*. NeurIPS 2017. [arXiv:1706.03762](https://arxiv.org/abs/1706.03762)
-2. Brown, T., et al. (2020). *Language Models are Few-Shot Learners (GPT-3)*. NeurIPS 2020. [arXiv:2005.14165](https://arxiv.org/abs/2005.14165)
-3. OpenAI. (2024). *OpenAI API Documentation*. https://platform.openai.com/docs
-4. Streamlit Inc. (2024). *Streamlit Documentation*. https://docs.streamlit.io
-5. Manning, C., & Schütze, H. (1999). *Foundations of Statistical Natural Language Processing*. MIT Press.
-6. Devlin, J., et al. (2019). *BERT: Pre-training of Deep Bidirectional Transformers*. [arXiv:1810.04805](https://arxiv.org/abs/1810.04805)
-7. Liu, P., et al. (2023). *Pre-train, Prompt, and Predict: A Systematic Survey of Prompting Methods in NLP*.
+1. Vaswani, A., et al. (2017). *Attention Is All Need*. NeurIPS 2017. [arXiv:1706.03762](https://arxiv.org/abs/1706.03762)
+2. Brown, T., et al. (2020). *Language Models are Few-Shot Learners*. NeurIPS 2020. [arXiv:2005.14165](https://arxiv.org/abs/2005.14165)
+3. Meta AI. (2024). *LLaMA 3: Open Foundation and Fine-Tuned Chat Models*. [ai.meta.com](https://ai.meta.com/llama)
+4. Jiang, A., et al. (2024). *Mixtral of Experts*. [arXiv:2401.04088](https://arxiv.org/abs/2401.04088)
+5. Groq. (2024). *Groq API Documentation*. https://console.groq.com/docs
+6. Streamlit Inc. (2024). *Streamlit Documentation*. https://docs.streamlit.io
+7. Manning, C., & Schütze, H. (1999). *Foundations of Statistical Natural Language Processing*. MIT Press.
 """)
 
 st.markdown("""
 <div style="text-align: center; color: rgba(148,163,184,0.5); font-size: 0.8rem; margin-top: 2rem;">
-    🤖 AI Resume & Cover Letter Generator | Capstone Project | Powered by OpenAI GPT & Streamlit<br>
-    Built with Python 🐍 | For Academic & Professional Use
+    🤖 AI Resume &amp; Cover Letter Generator | Capstone Project | Powered by Groq LLaMA &amp; Streamlit<br>
+    Built with Python 🐍 | For Academic &amp; Professional Use
 </div>
 """, unsafe_allow_html=True)

@@ -6,11 +6,13 @@
 # Core UI Framework
 streamlit==1.32.2
 
-# OpenAI GPT API (Transformer-based LLM)
-openai==1.14.3
+# Groq API — Free LLM inference (LLaMA 3, Mixtral)
+# Sign up free at https://console.groq.com
+groq>=0.9.0
 
 # Environment variable management
 python-dotenv==1.0.1
 
 # Standard library (no install needed, listed for documentation):
 # re, os
+
