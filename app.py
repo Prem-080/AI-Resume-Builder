@@ -90,33 +90,33 @@ else:
         "border_input": "#c8d0e0",
         "text":         "#1a202c",
         "text_muted":   "#5a6577",
-        "text_label":   "#6b7a90",
-        "accent":       "#3b5fc0",
-        "accent2":      "#5b3db0",
-        "sidebar_bg":   "#1a1a2e",
-        "sidebar_txt":  "#7a8899",
-        "sidebar_head": "#a78bfa",
-        "score_bg":     "rgba(59,95,192,0.06)",
-        "score_bdr":    "rgba(59,95,192,0.2)",
-        "hero_grad":    "linear-gradient(135deg,#3b5fc0 0%,#5b3db0 60%,#3b5fc0 100%)",
-        "hero_shine":   "rgba(255,255,255,0.12)",
-        "tag_vb_bg":    "rgba(91,61,176,0.08)",
-        "tag_vb_cl":    "#5b3db0",
-        "tag_vb_bd":    "rgba(91,61,176,0.22)",
-        "tag_sk_bg":    "rgba(13,148,136,0.08)",
-        "tag_sk_cl":    "#0d9488",
-        "tag_sk_bd":    "rgba(13,148,136,0.22)",
-        "tag_gp_bg":    "rgba(220,38,38,0.07)",
+        "text_label":   "#4b5563",
+        "accent":       "#3b82f6",
+        "accent2":      "#6366f1",
+        "sidebar_bg":   "#ffffff",
+        "sidebar_txt":  "#4b5563",
+        "sidebar_head": "#1f2937",
+        "score_bg":     "rgba(59,130,246,0.06)",
+        "score_bdr":    "rgba(59,130,246,0.2)",
+        "hero_grad":    "linear-gradient(135deg,#3b82f6 0%,#6366f1 100%)",
+        "hero_shine":   "rgba(255,255,255,0.2)",
+        "tag_vb_bg":    "rgba(99,102,241,0.08)",
+        "tag_vb_cl":    "#4f46e5",
+        "tag_vb_bd":    "rgba(99,102,241,0.22)",
+        "tag_sk_bg":    "rgba(16,185,129,0.08)",
+        "tag_sk_cl":    "#059669",
+        "tag_sk_bd":    "rgba(16,185,129,0.22)",
+        "tag_gp_bg":    "rgba(239,68,68,0.07)",
         "tag_gp_cl":    "#dc2626",
-        "tag_gp_bd":    "rgba(220,38,38,0.2)",
-        "tip_r_bg":     "rgba(220,38,38,0.06)",
-        "tip_r_bd":     "#dc2626",
-        "tip_y_bg":     "rgba(217,119,6,0.07)",
+        "tag_gp_bd":    "rgba(239,68,68,0.2)",
+        "tip_r_bg":     "rgba(239,68,68,0.06)",
+        "tip_r_bd":     "#ef4444",
+        "tip_y_bg":     "rgba(245,158,11,0.07)",
         "tip_y_bd":     "#d97706",
-        "tip_g_bg":     "rgba(13,148,136,0.07)",
-        "tip_g_bd":     "#0d9488",
-        "res_bg":       "#f8faff",
-        "progress_bg":  "#e8edf5",
+        "tip_g_bg":     "rgba(16,185,129,0.07)",
+        "tip_g_bd":     "#10b981",
+        "res_bg":       "#ffffff",
+        "progress_bg":  "#e5e7eb",
     }
 
 
@@ -268,16 +268,16 @@ html, body, [class*="css"] {{ font-family: 'DM Sans', sans-serif !important; }}
 }}
 
 /* ── Sidebar ── */
-[data-testid="stSidebar"] {{
-    background: {T['sidebar_bg']} !important;
+[data-testid="stSidebar"], section[data-testid="stSidebar"], div[data-testid="stSidebar"] {{
+    background-color: {T['sidebar_bg']} !important;
     border-right: 1px solid {T['border']} !important;
 }}
-[data-testid="stSidebar"] label,
-[data-testid="stSidebar"] .stMarkdown p,
-[data-testid="stSidebar"] .stMarkdown li,
-[data-testid="stSidebar"] .stCaption {{ color: {T['sidebar_txt']} !important; }}
-[data-testid="stSidebar"] h3,
-[data-testid="stSidebar"] h4 {{ color: {T['sidebar_head']} !important; }}
+[data-testid="stSidebarContent"], [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {{
+    color: {T['sidebar_txt']} !important;
+}}
+[data-testid="stSidebar"] h3, [data-testid="stSidebar"] h4, [data-testid="stSidebar"] label {{
+    color: {T['sidebar_head']} !important;
+}}
 
 /* ── Labels ── */
 label {{ color: {T['text_label']} !important; font-size: .86rem !important; font-weight: 500 !important; }}

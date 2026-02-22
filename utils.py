@@ -467,12 +467,13 @@ def _pdf_modern(name, email, phone, linkedin, job_role, sections, evaluation) ->
         pdf.line(18, y, 48, y); pdf.ln(3); pdf.set_text_color(*BODY)
 
     header()
+    pdf.set_y(52)  # Adjust content start to below the 46h header bar
     if sections.get("summary", "").strip():
         sh("Professional Summary"); _body(pdf, sections["summary"], W, 18, DARK, BODY, RULE)
     if sections.get("resume", "").strip():
         _body(pdf, sections["resume"], W, 18, DARK, BODY, RULE)
     if sections.get("cover_letter", "").strip():
-        pdf.add_page(); header(); sh("Cover Letter")
+        pdf.add_page(); header(); pdf.set_y(52); sh("Cover Letter")
         _body(pdf, sections["cover_letter"], W, 18, DARK, BODY, RULE)
 
     sc = evaluation.get("total_score", 0) or 0; gr = evaluation.get("grade", "N/A")
